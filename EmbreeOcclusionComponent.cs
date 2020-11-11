@@ -61,14 +61,21 @@ namespace GHEmbree
             var pts = new List<Rhino.Geometry.Point3d>();
             var obstructions = new List<Rhino.Geometry.Mesh>();
             var rays = new List<Rhino.Geometry.Vector3d>();
+            var hitCount = new List<int>;
 
             if (!DA.GetDataList(0, pts)) { return; }
             if (!DA.GetDataList(1, obstructions)) { return; }
             if (!DA.GetDataList(2, rays)) { return; }
 
-            var scene = EmbreeTools.BuildScene(obstructions);
+            var scene = EmbreeTools.BuildScene(obstructions);   
 
-            var hitCount = EmbreeTools.OcclusionHits(scene, pts, rays, true);
+            if (rays.Count < 25) // Needs more benchmarking to pick right value
+            {
+                hitCount = EmbreeTools.OcclusionHits(scene, pts, rays, true);
+            } else
+            {
+                hitCount = EmbreeTools.OcclusionHits4(scene, pts, rays, true);
+            }
 
             DA.SetDataList(0, hitCount);
         }

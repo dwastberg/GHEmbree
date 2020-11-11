@@ -85,5 +85,58 @@ namespace GHEmbree
 
             return hitCount;
         }
+
+        public static List<int> OcclusionHits4(Scene<Model> scene, List<Rhino.Geometry.Point3d> pts, List<Rhino.Geometry.Vector3d> viewVectors, bool reverseView = false)
+        {
+            int ray_packet_size = 4;
+            int ptCount = pts.Count;
+            int viewCount = viewVectors.Count;
+            var hitCount = new List<int>(new int[ptCount]); // initialzie with zeros
+            var EViews = new List<EVector>();
+            Ray[] rays = null;
+            bool[] hits = null;
+
+            foreach (var v in viewVectors)
+            {
+                if (reverseView) { v.Reverse(); }
+                EViews.Add(new EVector(v.X, v.Y, v.Z));
+            }
+
+            int ray_padding = (ray_packet_size - (viewCount % ray_packet_size)) % 4;
+            for (int i = 0; i < ray_padding; i++)
+            {
+                EViews.Add(new EVector(0, 0, -1));
+            }
+
+
+            Parallel.For(0, ptCount,
+               idx =>
+               {
+                   var p = pts[idx];
+                   var ePt = new EPoint(p.X, p.Y, p.Z);
+                   int processedRays = 0;
+                   for (int i = 0; i < viewCount; i += ray_packet_size)
+                   {
+                       
+                       rays = new[]
+                       {
+                           new Ray(ePt, EViews[i]),
+                           new Ray(ePt, EViews[i+1]),
+                           new Ray(ePt, EViews[i+2]),
+                           new Ray(ePt, EViews[i+3])
+                       };
+                       hits = scene.Occludes4(rays);
+                       foreach (var hit in hits)
+                       {
+                           processedRays++;
+                           if (processedRays>viewCount) { break; }
+                           if (hit) { hitCount[idx]++; }
+                       }
+                       
+                   }
+               });
+
+            return hitCount;
+        }
     }
 }

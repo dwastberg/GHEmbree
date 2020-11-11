@@ -61,7 +61,6 @@ namespace GHEmbree
             var pts = new List<Rhino.Geometry.Point3d>();
             var obstructions = new List<Rhino.Geometry.Mesh>();
             var rays = new List<Rhino.Geometry.Vector3d>();
-            var Erays = new List<EVector>();
 
             if (!DA.GetDataList(0, pts)) { return; }
             if (!DA.GetDataList(1, obstructions)) { return; }
@@ -69,28 +68,8 @@ namespace GHEmbree
 
             var scene = EmbreeTools.BuildScene(obstructions);
 
-            int ptCount = pts.Count;
-            var hitCount = new List<int>(new int[ptCount]); // initialzie with zeros
+            var hitCount = EmbreeTools.OcclusionHits(scene, pts, rays, true);
 
-
-            foreach (var v in rays)
-            {
-                v.Reverse();
-                Erays.Add(new EVector(v.X, v.Y, v.Z));
-            }
-
-            Parallel.For(0,ptCount,
-                idx => 
-                {
-                    // int hits = 0;
-                    var p = pts[idx];
-                    var ePt = new EPoint(p.X, p.Y, p.Z);
-                    foreach (var r in Erays)
-                    {
-                        bool hit = scene.Occludes(new Ray(ePt, r));
-                        if(hit) { hitCount[idx]++;  }
-                    }
-                });
             DA.SetDataList(0, hitCount);
         }
 

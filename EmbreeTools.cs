@@ -17,6 +17,7 @@ namespace GHEmbree
             List<IEmbreePoint> vertices = new List<IEmbreePoint>();
             List<int> indices = new List<int>();
             mesh.Faces.ConvertQuadsToTriangles();
+            
             foreach (var v in mesh.Vertices)
             {
                 vertices.Add(new EPoint(v.X, v.Y, v.Z));
@@ -55,6 +56,34 @@ namespace GHEmbree
             scene.Commit();
 
             return scene;
+        }
+
+        public static List<int> OcclusionHits(Scene<Model> scene,List<Rhino.Geometry.Point3d> pts, List<Rhino.Geometry.Vector3d> viewVectors, bool reverseView = false)
+        {
+            int ptCount = pts.Count;
+            var hitCount = new List<int>(new int[ptCount]); // initialzie with zeros
+            var Eviews = new List<EVector>();
+
+            foreach (var v in viewVectors)
+            {
+                if (reverseView) { v.Reverse(); }
+                Eviews.Add(new EVector(v.X, v.Y, v.Z));
+            }
+           
+            Parallel.For(0, ptCount,
+                idx =>
+                {
+                    // int hits = 0;
+                    var p = pts[idx];
+                    var ePt = new EPoint(p.X, p.Y, p.Z);
+                    foreach (var v in Eviews)
+                    {
+                        bool hit = scene.Occludes(new Ray(ePt, v));
+                        if (hit) { hitCount[idx]++; }
+                    }
+                });
+
+            return hitCount;
         }
     }
 }

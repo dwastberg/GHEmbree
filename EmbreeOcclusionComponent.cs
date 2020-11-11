@@ -1,10 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using Embree;
-using System.Threading;
-using System.Threading.Tasks;
-
-
 
 using Grasshopper.Kernel;
 using Rhino.Geometry;
@@ -26,7 +21,7 @@ namespace GHEmbree
         /// new tabs/panels will automatically be created.
         /// </summary>
         public EmbreeOcclusionComponent()
-          : base("EmbreeOcclusion", "EmOcc",
+          : base("EmbreeOcclusionHits", "EmOccH",
               "Fast mesh ray occlusion testing ",
               "Mesh", "Embree")
         {
@@ -48,7 +43,8 @@ namespace GHEmbree
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
             pManager.AddNumberParameter("Hits", "H", "Number of occluded rays per sample", GH_ParamAccess.list);
-            pManager.AddBooleanParameter("Occlusions", "O", "Occlusion topology for every individual sample", GH_ParamAccess.list);
+            // TODO: Add this output (unless it kills performance) 
+            // pManager.AddBooleanParameter("Occlusions", "O", "Occlusion topology for every individual sample", GH_ParamAccess.tree);
         }
 
         /// <summary>
@@ -61,7 +57,7 @@ namespace GHEmbree
             var pts = new List<Rhino.Geometry.Point3d>();
             var obstructions = new List<Rhino.Geometry.Mesh>();
             var rays = new List<Rhino.Geometry.Vector3d>();
-            var hitCount = new List<int>;
+            var hitCount = new List<int>();
 
             if (!DA.GetDataList(0, pts)) { return; }
             if (!DA.GetDataList(1, obstructions)) { return; }

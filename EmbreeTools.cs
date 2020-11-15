@@ -95,7 +95,6 @@ namespace GHEmbree
             int viewCount = viewVectors.Count;
             var hitCount = new List<int>(new int[ptCount]); // initialzie with zeros
             var EViews = new List<EVector>();
-            Ray[] rays = null;
             bool[] hits = null;
 
             foreach (var v in viewVectors)
@@ -120,7 +119,7 @@ namespace GHEmbree
                    for (int i = 0; i < viewCount; i += ray_packet_size)
                    {
                        
-                       rays = new[]
+                       var rays = new Ray[]
                        {
                            new Ray(ePt, EViews[i]),
                            new Ray(ePt, EViews[i+1]),

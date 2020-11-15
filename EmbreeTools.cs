@@ -17,7 +17,9 @@ namespace GHEmbree
             List<IEmbreePoint> vertices = new List<IEmbreePoint>();
             List<int> indices = new List<int>();
             mesh.Faces.ConvertQuadsToTriangles();
-            
+            mesh.Compact();
+
+
             foreach (var v in mesh.Vertices)
             {
                 vertices.Add(new EPoint(v.X, v.Y, v.Z));
@@ -25,8 +27,8 @@ namespace GHEmbree
             foreach (var f in mesh.Faces)
             {
                 indices.Add(f.A);
-                indices.Add(f.C);
                 indices.Add(f.B);
+                indices.Add(f.C);
             }
             return new TriangleMesh(device, indices, vertices);
 
@@ -135,8 +137,50 @@ namespace GHEmbree
                        
                    }
                });
-
             return hitCount;
+        }
+
+        public static List<Rhino.Geometry.Point> Intersections(Scene<Model> scene, List<Rhino.Geometry.Point3d> pts, List<Rhino.Geometry.Vector3d> directions, ref List<bool> hitMask)
+        {
+            int outputCount = Math.Max(pts.Count, directions.Count);
+            var meshIntersections = new Rhino.Geometry.Point[outputCount];
+            //var meshIntersections = new List<Rhino.Geometry.Point>();
+            var eDirections = new List<EVector>(directions.Count);
+            
+
+            // needed because we cannot access ref variables inside Parallel.For lambda
+            var localHitMask = new bool[outputCount];
+
+            foreach (var d in directions)
+            {
+                eDirections.Add(new EVector(d.X, d.Y, d.Z));
+            }
+
+            // Intersection<Model>[] hits = null;
+            Parallel.For(0, outputCount, idx =>
+            {
+                var pt = pts[Math.Min(idx, pts.Count - 1)];
+                var direction = eDirections[Math.Min(idx, eDirections.Count - 1)];
+
+                var ray = new Ray(new EPoint(pt.X, pt.Y, pt.Z), direction);
+                var packet = scene.Intersects(ray);
+                var hits = new Intersection<Model>[] { packet.ToIntersection<Model>(scene) };
+                localHitMask[idx] = (hits[0].HasHit);
+                if (hits[0].HasHit)
+                {
+                    var hitPos = ray.PointAt(hits[0].Distance);
+                    meshIntersections[idx] = (new Rhino.Geometry.Point(new Rhino.Geometry.Point3d(hitPos.X, hitPos.Y, hitPos.Z)));
+                }
+                else
+                {
+                    meshIntersections[idx] = null;
+                }
+            });
+
+            hitMask.AddRange(localHitMask);
+
+            return new List<Rhino.Geometry.Point>(meshIntersections);
+            //return meshIntersections;
         }
     }
 }

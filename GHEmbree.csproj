@@ -66,6 +66,7 @@
     <Compile Include="GHEmbreeInfo.cs" />
     <Compile Include="MathLibrary.cs" />
     <Compile Include="Model.cs" />
+    <Compile Include="EmbreeMeshRayIntersectComponent.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

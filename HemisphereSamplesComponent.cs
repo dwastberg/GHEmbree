@@ -45,21 +45,35 @@ namespace GHEmbree
         {
             int numSamples = 0;
             double angle = Math.PI;
+            bool reverse = false;
             var up = new Rhino.Geometry.Vector3d();
 
             if (!DA.GetData(0, ref numSamples)) { return; }
             if (!DA.GetData(1, ref angle)) { return; }
             if (!DA.GetData(2, ref up)) { return; }
+            if (!DA.GetData(3, ref reverse)) { return; }
+
             var hemisphereSample = new List<Vector3d>();
 
-            if (up.EpsilonEquals(new Vector3d(0, 0, 1), 1e-5))
+            if (angle > Math.PI) { angle = Math.PI; }
+
+            hemisphereSample = HemisphereSampling.Sample(numSamples, angle);
+
+            up.Unitize();
+
+            if (!up.EpsilonEquals(new Vector3d(0,0,1), 1e-5 ))
             {
-                hemisphereSample = HemisphereSampling.Sample(numSamples);
-            } else
-            {
-                hemisphereSample = HemisphereSampling.Sample(numSamples,up);
+                var T = HemisphereSampling.TransformFromUpVector(up);
+                var transformedSample = new List<Rhino.Geometry.Vector3d>(numSamples);
+                foreach (var v in hemisphereSample)
+                {
+                    v.Transform(T);
+                    transformedSample.Add(v);
+                }
+                hemisphereSample = transformedSample;
             }
-            
+
+
 
             DA.SetDataList(0, hemisphereSample);
         }

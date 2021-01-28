@@ -9,34 +9,50 @@ namespace GHEmbree
 {
     class HemisphereSampling
     {
-        public static List<Rhino.Geometry.Vector3d> Sample(int n, Rhino.Geometry.Vector3d up)
-        {
-            var hemisphereSample = Sample(n);
-            var T = TransformFromUpVector(up);
-            var transformedSample = new List<Rhino.Geometry.Vector3d>(n);
-            foreach (var v in hemisphereSample)
-            {
-                v.Transform(T);
-                transformedSample.Add(v);
+        //public static List<Rhino.Geometry.Vector3d> Sample(int n, Rhino.Geometry.Vector3d up, double coneAngle = Math.PI)
+        //{
+        //    var hemisphereSample = Sample(n, coneAngle);
+        //    var T = TransformFromUpVector(up);
+        //    var transformedSample = new List<Rhino.Geometry.Vector3d>(n);
+        //    foreach (var v in hemisphereSample)
+        //    {
+        //        v.Transform(T);
+        //        transformedSample.Add(v);
 
-            }
+        //    }
            
-            return transformedSample;
-        } 
+        //    return transformedSample;
+        //} 
 
-        public static List<Rhino.Geometry.Vector3d> Sample(int n)
+        public static List<Rhino.Geometry.Vector3d> Sample(int n, double coneAngle = Math.PI)
         {
             var hemisphereSample = new List<Rhino.Geometry.Vector3d>(n);
-            List<EPoint> Hn = hammersly_points(n);
-            foreach (EPoint p in Hn)
+            if (Math.Abs(coneAngle - Math.PI) < 1e-4)
             {
-                hemisphereSample.Add(HemsphereSampleCosine(p.X, p.Y));
+                List<EPoint> Hn = hammersly_points(n);
+                foreach (EPoint p in Hn)
+                {
+                    hemisphereSample.Add(HemsphereSampleCosine(p.X, p.Y));
+                }
+            } else
+            {
+                double areaRatio = 1 - Math.Cos(coneAngle / 2); // (2 * Math.PI * (1 - Math.Cos(coneAngle / 2))) / (2*Math.PI);
+                double angleZ = Math.Cos(coneAngle / 2);
+                n = (int) Math.Round(n / Math.Sqrt(areaRatio));
+                List<EPoint> Hn = hammersly_points(n);
+                foreach (var p in Hn)
+                        {
+                    var v = HemsphereSampleCosine(p.X, p.Y);
+                    if (v.Z>= angleZ) { hemisphereSample.Add(v); }
+
+                }
+
             }
 
             return hemisphereSample;
-        }
+            }
 
-        private static Rhino.Geometry.Transform TransformFromUpVector(Rhino.Geometry.Vector3d up)
+        public static Rhino.Geometry.Transform TransformFromUpVector(Rhino.Geometry.Vector3d up)
         // http://math.stackexchange.com/questions/180418/calculate-rotation-matrix-to-align-vector-a-to-vector-b-in-3d/
         {
             var T = new Rhino.Geometry.Transform(1.0);

@@ -65,6 +65,7 @@ namespace GHEmbree
             int ptCount = pts.Count;
             var hitCount = new List<int>(new int[ptCount]); // initialzie with zeros
             var Eviews = new List<EVector>();
+            float tnear = 0.01F;
 
             foreach (var v in viewVectors)
             {
@@ -80,7 +81,7 @@ namespace GHEmbree
                     var ePt = new EPoint(p.X, p.Y, p.Z);
                     foreach (var v in Eviews)
                     {
-                        bool hit = scene.Occludes(new Ray(ePt, v));
+                        bool hit = scene.Occludes(new Ray(ePt, v), tnear);
                         if (hit) { hitCount[idx]++; }
                     }
                 });
@@ -91,6 +92,7 @@ namespace GHEmbree
         public static List<int> OcclusionHits4(Scene<Model> scene, List<Rhino.Geometry.Point3d> pts, List<Rhino.Geometry.Vector3d> viewVectors, bool reverseView = false)
         {
             int ray_packet_size = 4;
+            float tnear = 0.01F;
             int ptCount = pts.Count;
             int viewCount = viewVectors.Count;
             var hitCount = new List<int>(new int[ptCount]); // initialzie with zeros
@@ -126,7 +128,7 @@ namespace GHEmbree
                            new Ray(ePt, EViews[i+2]),
                            new Ray(ePt, EViews[i+3])
                        };
-                       hits = scene.Occludes4(rays);
+                       hits = scene.Occludes4(rays, tnear);
                        foreach (var hit in hits)
                        {
                            processedRays++;
@@ -145,6 +147,7 @@ namespace GHEmbree
             var meshIntersections = new Rhino.Geometry.Point[outputCount];
             // var eDirections = new List<EVector>(directions.Count);
             int ray_packet_size = 4;
+            float tnear = 0.01F;
             var rayPackets = new List<Ray[]>();             
 
             // needed because we cannot access ref variables inside Parallel.For lambda
@@ -167,7 +170,7 @@ namespace GHEmbree
             int overPack = total_pack_count - outputCount;
 
             Parallel.For(0, rayPackets.Count, idx => {
-                var packet = scene.Intersects4(rayPackets[idx]);
+                var packet = scene.Intersects4(rayPackets[idx], tnear);
                 var hits = packet.ToIntersection<Model>(scene);
                 for (int i = 0; i < ray_packet_size; i++)
                 {

@@ -61,12 +61,14 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="MeshMeshIntersect.cs" />
     <Compile Include="EmbreeTools.cs" />
     <Compile Include="EmbreeOcclusionComponent.cs" />
     <Compile Include="GHEmbreeInfo.cs" />
     <Compile Include="MathLibrary.cs" />
     <Compile Include="Model.cs" />
     <Compile Include="EmbreeMeshRayIntersectComponent.cs" />
+    <Compile Include="MeshMeshIntersectsComponent.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -11,7 +11,7 @@ namespace GHEmbree
 {
     class MeshMeshIntersect
     {
-        public static bool TestIntersect(Mesh meshA, Mesh meshB, bool fast = true)
+        public static bool TestIntersect(Mesh meshA, Mesh meshB, ref Point3d pt, bool fast = true)
         {
             bool meshInterects = false;
 
@@ -46,6 +46,9 @@ namespace GHEmbree
                     if (hit)
                     {
                         meshInterects = true;
+                        var intersect = packet.ToIntersection<Model>(scene);
+                        var hitPos = ray.Item1.PointAt(intersect.Distance);
+                        pt = new Rhino.Geometry.Point3d(hitPos.X, hitPos.Y, hitPos.Z);
                         break;
                     }
                 }
@@ -78,7 +81,7 @@ namespace GHEmbree
 
         }
 
-        static bool BBoxIntersect(BoundingBox bboxA, BoundingBox bboxB)
+        private static bool BBoxIntersect(BoundingBox bboxA, BoundingBox bboxB)
         {
             if (bboxA.Max.X < bboxB.Min.X) return false; 
             if (bboxA.Min.X > bboxB.Max.X) return false; 

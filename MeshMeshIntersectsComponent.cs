@@ -34,6 +34,7 @@ namespace GHEmbree
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
             pManager.AddBooleanParameter("Intersect", "I", "Do meshes intersect", GH_ParamAccess.item);
+            pManager.AddPointParameter("Intersection point", "P", "First intersection point found", GH_ParamAccess.item);
         }
 
         /// <summary>
@@ -50,9 +51,16 @@ namespace GHEmbree
             if (!DA.GetData(1, ref meshB)) { return; }
             if (!DA.GetData(2, ref fastApprox)) { return; }
 
-            bool intersects = MeshMeshIntersect.TestIntersect(meshA, meshB);
+            var iPt = new Point3d();
+            bool intersects = MeshMeshIntersect.TestIntersect(meshA, meshB, ref iPt);
+            
 
             DA.SetData(0, intersects);
+            if (intersects)
+            {
+                DA.SetData(1, iPt);
+            }
+            
         }
 
         /// <summary>

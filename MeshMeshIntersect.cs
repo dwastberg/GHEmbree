@@ -48,7 +48,7 @@ namespace GHEmbree
                         meshInterects = true;
                         var intersect = packet.ToIntersection<Model>(scene);
                         var hitPos = ray.Item1.PointAt(intersect.Distance);
-                        pt = new Rhino.Geometry.Point3d(hitPos.X, hitPos.Y, hitPos.Z);
+                        pt = new Point3d(hitPos.X, hitPos.Y, hitPos.Z);
                         break;
                     }
                 }

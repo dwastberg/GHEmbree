@@ -14,7 +14,7 @@ namespace GHEmbree
         public EmbreeMeshRayIntersectComponent()
           : base("EmbreeMesh|Ray", "EmMeshRay",
               "Intersect mesh with ray",
-              "Mesh", "Embree")
+               "Intersect", "GHEmbree")
         {
         }
         

@@ -23,7 +23,7 @@ namespace GHEmbree
         public EmbreeOcclusionComponent()
           : base("EmbreeOcclusionHits", "EmOccH",
               "Fast mesh ray occlusion testing ",
-              "Mesh", "Embree")
+              "Intersect", "GHEmbree")
         {
         }
 

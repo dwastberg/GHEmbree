@@ -13,7 +13,7 @@ namespace GHEmbree
         public MeshMeshIntersectsComponent()
           : base("MeshMeshIntesects", "M|M",
               "Test for intersection between two meshes",
-              "Mesh", "GHEmbree")
+               "Intersect", "GHEmbree")
         {
         }
 
@@ -24,7 +24,7 @@ namespace GHEmbree
         {
             pManager.AddMeshParameter("MeshA", "A", "Mesh A", GH_ParamAccess.item);
             pManager.AddMeshParameter("MeshB", "B", "Mesh B", GH_ParamAccess.item);
-            pManager.AddBooleanParameter("Fast", "F", "Use faster method, can give false negative in some corner cases", GH_ParamAccess.item,true);
+            // pManager.AddBooleanParameter("Fast", "F", "Use faster method, can give false negative in some corner cases", GH_ParamAccess.item,true);
 
         }
 
@@ -45,11 +45,11 @@ namespace GHEmbree
         {
             var meshA = new Rhino.Geometry.Mesh();
             var meshB = new Rhino.Geometry.Mesh();
-            bool fastApprox = false;
+            bool fastApprox = true;
 
             if (!DA.GetData(0, ref meshA)) { return; }
             if (!DA.GetData(1, ref meshB)) { return; }
-            if (!DA.GetData(2, ref fastApprox)) { return; }
+           //  if (!DA.GetData(2, ref fastApprox)) { return; }
 
             var iPt = new Point3d();
             bool intersects = MeshMeshIntersect.TestIntersect(meshA, meshB, ref iPt);
